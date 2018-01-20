@@ -8,6 +8,14 @@ usage: elb_ssl_swap.py [-h] [-r REGION] [-p PORT] -a ACCOUNT_NUMBER -c CERT_ID
 elb_ssl_swap.py: error: argument -a/--account_number is required
 ```
 
+### Setup
+
+1. Clone this
+1. Create a virtualenv `virtualenv elb_ssl_swap`
+1. Activate the virtualenv: `source elb_ssl_swap/bin/activate`
+1. Install the requirements: `pip install -r requirements.txt`
+1. Run script with your parameters
+
 ### Params
 - `-r` - Region ie us-west-2, us-east-1, etc.
 - `-p` - Port number, defaults to `443`
