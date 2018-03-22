@@ -8,32 +8,6 @@ from datetime import datetime
 
 suffixes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
 
-parser = argparse.ArgumentParser(description="Find S3 Bucket Size", formatter_class=argparse.RawTextHelpFormatter)
-group = parser.add_mutually_exclusive_group(required=True)
-group.add_argument('-b', '--bucket-name',
-                    dest='bucket_name',
-                    action='store',
-                    help='Name of an S3 Bucket')
-group.add_argument('-f', '--filename',
-                    dest='filename',
-                    action='store',
-                    help='Name of file containing bucket names one per line.')
-parser.add_argument('-d', '--days',
-                    dest='days',
-                    type=int,
-                    default='2',
-                    action='store',
-                    help='Number of "Days ago" to pull datapoints from\nDefault: 2')
-parser.add_argument('-s', '--storage-type',
-                    dest='storage_type',
-                    default='StandardStorage',
-                    action='store',
-                    help="Type of Storage to check for:\n"
-                    "StandardStorage | StandardIAStorage | ReducedRedundancyStorage\n"
-                    "Default: StandardStorage")
-
-args = parser.parse_args()
-
 
 def from_file(filename):
     with open(filename) as bucket_file:
@@ -60,16 +34,16 @@ def get_metrics(region_name, NameSpace, MetricName, BucketName, Days, StorageTyp
     start_time = datetime.utcnow() - timedelta(days=Days)
     end_time = datetime.utcnow()
     response = connection('cloudwatch', region_name).get_metric_statistics(
-            Namespace=NameSpace,
-            MetricName=MetricName,
-            StartTime=start_time,
-            EndTime=end_time,
-            Period=Period,
-            Statistics=['Average'],
-            Dimensions=[
-                {'Name':'BucketName','Value': BucketName},
-                {u'Name': 'StorageType',u'Value': StorageType}
-            ]
+        Namespace=NameSpace,
+        MetricName=MetricName,
+        StartTime=start_time,
+        EndTime=end_time,
+        Period=Period,
+        Statistics=['Average'],
+        Dimensions=[
+            {'Name': 'BucketName', 'Value': BucketName},
+            {u'Name': 'StorageType', u'Value': StorageType},
+        ]
     )
     return response
 
@@ -81,7 +55,7 @@ def output_formatter(metric_response):
 
 def humansize(nbytes):
     i = 0
-    while nbytes >= 1024 and i < len(suffixes)-1:
+    while nbytes >= 1024 and i < len(suffixes) - 1:
         nbytes /= 1024.
         i += 1
     f = ('%.2f' % nbytes).rstrip('0').rstrip('.')
@@ -108,5 +82,29 @@ def main():
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="Find S3 Bucket Size",
+                                     formatter_class=argparse.RawTextHelpFormatter)
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument('-b', '--bucket-name',
+                       dest='bucket_name',
+                       action='store',
+                       help='Name of an S3 Bucket')
+    group.add_argument('-f', '--filename',
+                       dest='filename',
+                       action='store',
+                       help='Name of file containing bucket names one per line.')
+    parser.add_argument('-d', '--days',
+                        dest='days',
+                        type=int,
+                        default='2',
+                        action='store',
+                        help='Number of "Days ago" to pull datapoints from\nDefault: 2')
+    parser.add_argument('-s', '--storage-type',
+                        dest='storage_type',
+                        default='StandardStorage',
+                        action='store',
+                        help="Type of Storage to check for:\n"
+                        "StandardStorage | StandardIAStorage | ReducedRedundancyStorage\n"
+                        "Default: StandardStorage")
+    args = parser.parse_args()
     main()
-
