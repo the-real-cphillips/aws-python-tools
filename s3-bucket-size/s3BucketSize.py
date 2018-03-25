@@ -16,13 +16,14 @@ def from_file(filename):
     return bucket_list
 
 
-def connection(service, region_name='us-east-1'):
-    client = boto3.client(service, region_name=region_name)
+def connection(service, profile, region_name='us-east-1'):
+    session = boto3.Session(profile_name=profile)
+    client = session.client(service, region_name=region_name)
     return client
 
 
 def get_bucket_location(bucket_name):
-    location = connection('s3').get_bucket_location(Bucket=bucket_name)['LocationConstraint']
+    location = connection('s3', args.profile_name).get_bucket_location(Bucket=bucket_name)['LocationConstraint']
     if location is None:
         bucket_location = 'us-east-1'
     else:
@@ -33,7 +34,7 @@ def get_bucket_location(bucket_name):
 def get_metrics(region_name, NameSpace, MetricName, BucketName, Days, StorageType, Period=86400):
     start_time = datetime.utcnow() - timedelta(days=Days)
     end_time = datetime.utcnow()
-    response = connection('cloudwatch', region_name).get_metric_statistics(
+    response = connection('cloudwatch', args.profile_name, region_name).get_metric_statistics(
         Namespace=NameSpace,
         MetricName=MetricName,
         StartTime=start_time,
@@ -74,11 +75,13 @@ def main():
             region_name = get_bucket_location(bucket)
         except botocore.exceptions.ClientError as e:
             print "ERROR: %s: %s" % (bucket, e)
+            return
         try:
             metric_response = get_metrics(region_name, 'AWS/S3', 'BucketSizeBytes', bucket, args.days, args.storage_type)
             print "%s Size: %s" % (bucket, output_formatter(metric_response))
         except botocore.exceptions.EndpointConnectionError as e:
             print "ERROR: %s: %s" % (bucket, e)
+            return
 
 
 if __name__ == '__main__':
@@ -106,5 +109,10 @@ if __name__ == '__main__':
                         help="Type of Storage to check for:\n"
                         "StandardStorage | StandardIAStorage | ReducedRedundancyStorage\n"
                         "Default: StandardStorage")
+    parser.add_argument('-p', '--profile-name',
+                        dest='profile_name',
+                        default='default',
+                        action='store',
+                        help="Use different profile in ~/.aws/credentials: default is named default")
     args = parser.parse_args()
     main()
