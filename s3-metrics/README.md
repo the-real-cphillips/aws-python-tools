@@ -27,6 +27,4 @@ optional arguments:
                         Default: StandardStorage
   -p PROFILE_NAME, --profile-name PROFILE_NAME
                         Use different profile in ~/.aws/credentials: default is named default
-k
-
 ```
