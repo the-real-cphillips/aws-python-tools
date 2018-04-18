@@ -51,7 +51,10 @@ def get_metrics(region_name, NameSpace, MetricName, BucketName, Days, StorageTyp
 
 def output_formatter(metric_response):
     for datapoint in metric_response['Datapoints']:
-        return humansize(datapoint['Average'])
+        if args.metric_name == 'BucketSizeBytes':
+            return humansize(datapoint['Average'])
+        else:
+            return str(int(datapoint['Average']))
 
 
 def humansize(nbytes):
@@ -77,15 +80,15 @@ def main():
             print "ERROR: %s: %s" % (bucket, e)
             return
         try:
-            metric_response = get_metrics(region_name, 'AWS/S3', 'BucketSizeBytes', bucket, args.days, args.storage_type)
-            print "%s Size: %s" % (bucket, output_formatter(metric_response))
+            metric_response = get_metrics(region_name, 'AWS/S3', args.metric_name, bucket, args.days, args.storage_type)
+            print "%s : %s" % (bucket, output_formatter(metric_response))
         except botocore.exceptions.EndpointConnectionError as e:
             print "ERROR: %s: %s" % (bucket, e)
             return
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="Find S3 Bucket Size",
+    parser = argparse.ArgumentParser(description="Find S3 Metrics from Cloudwatch",
                                      formatter_class=argparse.RawTextHelpFormatter)
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('-b', '--bucket-name',
@@ -102,12 +105,19 @@ if __name__ == '__main__':
                         default='2',
                         action='store',
                         help='Number of "Days ago" to pull datapoints from\nDefault: 2')
+    parser.add_argument('-m', '--metric-name',
+                        dest='metric_name',
+                        default='BucketSizeBytes',
+                        action='store',
+                        help="Type of Metric to check for:\n"
+                        "BucketSizeBytes | NumberOfObjects\n"
+                        "Default: BucketSizeBytes")
     parser.add_argument('-s', '--storage-type',
                         dest='storage_type',
                         default='StandardStorage',
                         action='store',
                         help="Type of Storage to check for:\n"
-                        "StandardStorage | StandardIAStorage | ReducedRedundancyStorage\n"
+                        "StandardStorage | StandardIAStorage | ReducedRedundancyStorage | AllStorageTypes\n"
                         "Default: StandardStorage")
     parser.add_argument('-p', '--profile-name',
                         dest='profile_name',
