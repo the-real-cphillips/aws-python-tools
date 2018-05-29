@@ -3,16 +3,16 @@
 ### Usage
 
 ```
-usage: elb_ssl_swap.py [-h] [-r REGION] [-p PORT] -a ACCOUNT_NUMBER -c CERT_ID
+usage: sslswappa.py [-h] [-r REGION] [-p PORT] -a ACCOUNT_NUMBER -c CERT_ID
                        -e ELB_NAME
-elb_ssl_swap.py: error: argument -a/--account_number is required
+sslswappa.py: error: argument -a/--account_number is required
 ```
 
 ### Setup
 
 1. Clone this
-1. Create a virtualenv `virtualenv elb_ssl_swap`
-1. Activate the virtualenv: `source elb_ssl_swap/bin/activate`
+1. Create a virtualenv `virtualenv sslswappa`
+1. Activate the virtualenv: `source sslswappa/bin/activate`
 1. Install the requirements: `pip install -r requirements.txt`
 1. Run script with your parameters
 
@@ -26,7 +26,7 @@ elb_ssl_swap.py: error: argument -a/--account_number is required
 ### Example
 
 ```
-./elb_ssl_swap.py -r us-west-2 -a xxxxxxxxxxxx -c xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx -e my-elb-test
+./sslswappa.py -r us-west-2 -a xxxxxxxxxxxx -c xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx -e my-elb-test
 ```
 
 Success Output:
